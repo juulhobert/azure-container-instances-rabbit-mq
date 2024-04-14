@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>tech.juuls</groupId>
+    <artifactId>azure-container-instances-rabbit-mq-sender</artifactId>
+    <version>1.0</version>
+
+    <properties>
+        <kotlin.version>1.9.20</kotlin.version>
+        <amqp-client.version>5.21.0</amqp-client.version>
+        <ktor-client.version>2.3.12</ktor-client.version>
+        <main.class>tech.juuls.sender.MainKt</main.class>
+        <azure.resource-group>playground-rabbitmq</azure.resource-group>
+        <azure.app-name>sender-app</azure.app-name>
+        <main.class>tech.juuls.sender.MainKt</main.class>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.rabbitmq</groupId>
+            <artifactId>amqp-client</artifactId>
+            <version>${amqp-client.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-stdlib</artifactId>
+            <version>${kotlin.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-client-core-jvm</artifactId>
+            <version>${ktor-client.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-server-netty-jvm</artifactId>
+            <version>${ktor-client.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <sourceDirectory>${project.basedir}/src/main/kotlin</sourceDirectory>
+
+        <plugins>
+            <plugin>
+                <artifactId>kotlin-maven-plugin</artifactId>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <version>${kotlin.version}</version>
+
+                <executions>
+                    <execution>
+                        <id>compile</id>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.microsoft.azure</groupId>
+                <artifactId>azure-webapp-maven-plugin</artifactId>
+                <version>2.9.0</version>
+                <configuration>
+                    <resourceGroup>${azure.resource-group}</resourceGroup>
+                    <appName>${azure.app-name}</appName>
+                    <deployment>
+                        <resources>
+                            <resource>
+                                <type>jar</type>
+                                <directory>${project.basedir}/target</directory>
+                                <includes>
+                                    <include>*-jar-with-dependencies.jar</include>
+                                </includes>
+                            </resource>
+                        </resources>
+                    </deployment>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>3.7.1</version>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <mainClass>${main.class}</mainClass>
+                        </manifest>
+                    </archive>
+                    <descriptorRefs>
+                        <descriptorRef>jar-with-dependencies</descriptorRef>
+                    </descriptorRefs>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>
